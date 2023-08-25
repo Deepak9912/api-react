@@ -1,30 +1,34 @@
-import { useState } from 'react';
 import './App.css';
-import TaskForm from './component/TaskForm.js';
-import Task from './component/Task.js';
-
+import {useState} from 'react';
+import MovieList from './component/MovieList';
 
 function App() {
-  const [taskInput, setTaskInput] = useState([]);
 
-  const saveTaskDataHandler = (enteredTaskData) => {
-    setTaskInput([...taskInput, enteredTaskData])
-  };
+  const [movies, setMovies] = useState([]);
 
-  const removeDataHandler = (key) => {
-    let newTask = [...taskInput];
-    newTask.splice(key, 1);
-    setTaskInput([...newTask])
-  };
+  function fetchMovieHandler(){
+    fetch('https://swapi.dev/api/films/').then(res=>{
+      return res.json();
+    }).then(data=>{
+      const transformedMovies = data.results.map(movieData => {
+        return {
+          id: movieData.episode_id,
+          title: movieData.title,
+          opening_crawl: movieData.opening_crawl,
+          producer: movieData.producer,
+          release_date: movieData.release_date
+        }
+      })
+      setMovies(transformedMovies);
+    });
+  }
 
   return (
     <div>
-      <TaskForm onSaveTaskData={saveTaskDataHandler}/>
-      {taskInput.map((taskItem, i) => {
-        return (
-          <Task task={taskItem} index={i} key={i} onDeleteItem={removeDataHandler} />
-        )
-      })}
+      <section>
+        <button onClick={fetchMovieHandler}>Fetch Movies</button>
+      </section>
+      <MovieList movies={movies} />
     </div>
   );
 }
